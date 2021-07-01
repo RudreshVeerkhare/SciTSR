@@ -67,8 +67,8 @@ class Trainer:
             #train_acc = self.test_epoch(epoch, self.train_dataset)
             #self._print_epoch_info(epoch, 'train', acc=train_acc)
             if self.test_dataset:
-                lf.test_epoch(epoch, self.test_dataset)
-            self._print_epoch_info(epoch, 'test', t_acc=test_acc)
+                test_acc = self.test_epoch(epoch, self.test_dataset)
+                self._print_epoch_info(epoch, 'test', t_acc=test_acc)
 
         print('Training finished.')
         return self.model
