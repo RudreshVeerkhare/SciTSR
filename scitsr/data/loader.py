@@ -105,7 +105,7 @@ class TableDataset(Dataset):
         #nodes, edges = self.normlize(nodes), self.normlize(edges)
         return nodes, edges, adj, incidence, labels
 
-    def load_dataset(self, dataset_dir, with_cells, trim=None, debug=False, exts=None):
+    def load_dataset(self, dataset_dir, with_cells, trim=None, debug=False, exts=None, rel_needed=True):
         dataset, cells = [], []
         if exts is None:
             exts = ['chunk', 'rel']
@@ -116,12 +116,14 @@ class TableDataset(Dataset):
             if debug and i > 50:
                 break
             chunk_path = paths[0]
-            relation_path = paths[1]
-
             chunks = self.load_chunks(chunk_path)
             # TODO handle big tables
             # if len(chunks) > 100 or len(chunks) == 0: continue
-            relations = self.load_relations(relation_path)
+            if rel_needed:
+                relation_path = paths[1]
+                relations = self.load_relations(relation_path)
+            else:
+                relations = []
             #new_chunks, new_rels = self.clean_chunk_rel(chunks, relations)
             #chunks, relations = new_chunks, new_rels
 
