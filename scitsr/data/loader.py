@@ -21,9 +21,9 @@ from scitsr.eval import Relation
 
 
 class Data:
-
+    # Data <-One to One-> Table
     def __init__(self, chunks, relations, cells=None,
-                 path=None, nodes=None, edges=None, 
+                 path=None, nodes=None, edges=None,
                  adj=None, incidence=None, labels=None):
         self.chunks = chunks
         self.relations = relations
@@ -40,7 +40,8 @@ class TableDataset(Dataset):
 
     def __init__(self, dataset_dir, with_cells, trim=None,
                  node_norm=None, edge_norm=None, exts=None):
-        if exts is None: exts = ['chunk12', 'rel12']
+        if exts is None:
+            exts = ['chunk12', 'rel12']
         raw_dataset = self.load_dataset(
             dataset_dir, with_cells, trim, exts=exts)
         raw_dataset = preprocessing(raw_dataset)
@@ -59,38 +60,39 @@ class TableDataset(Dataset):
         self.n_node_features = self.dataset[0].nodes.size(1)
         self.n_edge_features = self.dataset[0].edges.size(1)
         self.output_size = self.dataset[0].labels.max().item() + 1
-    
+
     def shuffle(self):
         random.shuffle(self.dataset)
-    
+
     def feature_normalizaion(self, dataset, node_param=None, edge_param=None):
 
         def _get_mean_std(features):
             mean = features.mean(dim=0, keepdim=True)
             std = features.std(dim=0, keepdim=True)
             return mean, std
-        
+
         def _norm(features, mean, std, eps=1e-6):
             return (features - mean) / (std + 1e-6)
-        
+
         # normalize edge features
         if edge_param is None:
             all_edge_features = torch.cat([data.edges for data in dataset])
             edge_mean, edge_std = _get_mean_std(all_edge_features)
-        else: edge_mean, edge_std = edge_param
+        else:
+            edge_mean, edge_std = edge_param
         for data in dataset:
             data.edges = _norm(data.edges, edge_mean, edge_std)
-        
+
         # normalize node features
         if node_param is None:
             all_node_features = torch.cat([data.nodes for data in dataset])
             node_mean, node_std = _get_mean_std(all_node_features)
-        else: node_mean, node_std = node_param
+        else:
+            node_mean, node_std = node_param
         for data in dataset:
             data.nodes = _norm(data.nodes, node_mean, node_std)
-        
-        return (node_mean, node_std), (edge_mean, edge_std)
 
+        return (node_mean, node_std), (edge_mean, edge_std)
 
     def transform(self, chunks, relations):
         vertexes = self.get_vertexes(chunks)
@@ -105,7 +107,8 @@ class TableDataset(Dataset):
 
     def load_dataset(self, dataset_dir, with_cells, trim=None, debug=False, exts=None):
         dataset, cells = [], []
-        if exts is None: exts = ['chunk', 'rel']
+        if exts is None:
+            exts = ['chunk', 'rel']
         if with_cells:
             exts.append('json')
         sub_paths = self.get_sub_paths(dataset_dir, exts, trim=trim)
@@ -117,7 +120,7 @@ class TableDataset(Dataset):
 
             chunks = self.load_chunks(chunk_path)
             # TODO handle big tables
-            #if len(chunks) > 100 or len(chunks) == 0: continue
+            # if len(chunks) > 100 or len(chunks) == 0: continue
             relations = self.load_relations(relation_path)
             #new_chunks, new_rels = self.clean_chunk_rel(chunks, relations)
             #chunks, relations = new_chunks, new_rels
@@ -136,7 +139,7 @@ class TableDataset(Dataset):
                 path=chunk_path,
             ))
         return dataset
-    
+
     def clean_chunk_rel(self, chunks, relations):
         """Remove null chunks"""
         new_chunks = []
@@ -150,7 +153,8 @@ class TableDataset(Dataset):
         for i, j, t in relations:
             ni = oldid2newid[i]
             nj = oldid2newid[j]
-            if ni != -1 and nj != -1: new_rels.append((ni, nj, t))
+            if ni != -1 and nj != -1:
+                new_rels.append((ni, nj, t))
         return new_chunks, new_rels
 
     def load_chunks(self, chunk_path):
@@ -163,7 +167,7 @@ class TableDataset(Dataset):
                 chunk["pos"][0], chunk["pos"][1] = chunk["pos"][1], chunk["pos"][0]
                 print("Warning load illegal chunk.")
             c = Chunk.load_from_dict(chunk)
-            #if c.x2 == c.x1 or c.y2 == c.y1 or c.text == "": 
+            # if c.x2 == c.x1 or c.y2 == c.y1 or c.text == "":
             #    continue
             ret.append(c)
         return ret
@@ -199,7 +203,7 @@ class TableDataset(Dataset):
                 assert os.path.exists(sub_path)
                 sub_paths.append(sub_path)
             paths.append(sub_paths)
-        
+
         return paths
 
     def get_vertexes(self, chunks):
@@ -254,7 +258,7 @@ class TableDataset(Dataset):
         labels = torch.tensor(labels, dtype=torch.long)
         return nodes, edges, adj, incidence, labels
 
-    #TODO normalize over dataset?
+    # TODO normalize over dataset?
     def normlize(self, features):
         mean = features.mean(dim=0, keepdim=True)
         std = features.std(dim=0, keepdim=True)
@@ -272,7 +276,8 @@ class TableInferDataset(TableDataset):
 
     def __init__(self, dataset_dir, trim=None,
                  node_norm=None, edge_norm=None, exts=None):
-        if exts is None: exts = ['chunk12', 'rel12']
+        if exts is None:
+            exts = ['chunk']
         raw_dataset = self.load_dataset(
             dataset_dir, True, trim, exts=exts)
         raw_dataset = preprocessing(raw_dataset)

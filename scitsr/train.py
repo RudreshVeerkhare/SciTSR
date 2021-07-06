@@ -201,7 +201,7 @@ if __name__ == '__main__':
     #hidden_size = 64
     hidden_size = 4
     n_blocks = 3
-    n_epochs = 15
+    n_epochs = 6
     learning_rate = 0.0005
     weight_clipping = 1
     weight_decay = 1e-4
