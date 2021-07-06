@@ -279,7 +279,7 @@ class TableInferDataset(TableDataset):
         if exts is None:
             exts = ['chunk']
         raw_dataset = self.load_dataset(
-            dataset_dir, True, trim, exts=exts)
+            dataset_dir, False, trim, exts=exts)
         raw_dataset = preprocessing(raw_dataset)
 
         dataset = []
