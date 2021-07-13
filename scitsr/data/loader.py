@@ -243,9 +243,14 @@ class TableDataset(Dataset):
     def get_edges(self, relations, vertexes):
         edge_features = []
         for i, j, _ in relations:
-            edge = Edge(vertexes[i], vertexes[j])
-            features = [v for v in edge.get_features().values()]
-            edge_features.append(features)
+            # added try block to deal with zero
+            # division error for some blocks
+            try:
+                edge = Edge(vertexes[i], vertexes[j])
+                features = [v for v in edge.get_features().values()]
+                edge_features.append(features)
+            except:
+                continue
         return edge_features
 
     def get_labels(self, relations):
